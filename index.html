@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>睁开双眼是天空</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/smiley-sans@2.0.1/dist/fonts/smiley-sans.css">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;
@@ -631,9 +630,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;
 .hover-replace .float-char{
   pointer-events: auto;   /* ★ 关键：让被包裹的关键词也能被鼠标命中 */
 }
-.hover-replace .hover-replace-text{
-  pointer-events: auto;
-}
 .hover-replace-text{
   display: inline;
   pointer-events: auto;
@@ -642,10 +638,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;
   text-shadow:
     0 2px 6px rgba(0,0,0,.75),
     0 0 12px rgba(0,0,0,.55),
-    0 0 2px rgba(10,0,50,.95);
+    0 0 2px rgba(20,40,120,.95);   /* ★ 描边改成偏蓝的深靛色 */
   line-height: inherit;
   letter-spacing: inherit;
 }
+
 /* ★ 悬停删除线 + 右侧挤进文字 */
 .strike-wrap{
   position: relative;
@@ -776,6 +773,212 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;
   width: 0%; height: 100%; background: #fff; transition: width 0.2s ease;
 }
 .loader-text { font-size: 16px; color: rgba(200,220,255,.5); margin-top: 12px; }
+/* ================================================================
+   ★ 最终彩蛋：点阵 + Q&A
+   ================================================================ */
+@keyframes qaBreath {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
+}
+@keyframes qaBreathStrong {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+
+.qa-title {
+  position: absolute;
+  left: 50%; top: 30px;
+  transform: translateX(-50%) translateY(30px);
+  width: 2200px;
+  font-family: "Yozai","悠哉字体","Smiley Sans","得意黑",sans-serif;
+  font-size: 54px;
+  letter-spacing: .15em;
+  color: #3a4a7a;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1.2s ease, transform 1.2s cubic-bezier(.22,.9,.3,1);
+  pointer-events: none;
+  z-index: 15;
+}
+.qa-title.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.qa-title .num {
+  color: #c8556a;
+  font-size: 82px;
+  font-weight: 900;
+  font-family: "Smiley Sans", "得意黑", sans-serif;
+}
+
+.qa-starfield {
+  position: absolute;
+  left: 0; top: 0;
+  width: 2560px; height: 3000px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.qa-star-enter {
+  position: absolute;
+  opacity: 0;
+  transform: translateY(80px);
+  transition: opacity .9s ease, transform .9s cubic-bezier(.22,.9,.3,1);
+  will-change: opacity, transform;
+  pointer-events: none;
+}
+.qa-star-enter.on { opacity: 1; transform: translateY(0); }
+
+.qa-star-breath {
+  width: 100%; height: 100%;
+  animation: qaBreath 4s ease-in-out infinite;
+  will-change: transform;
+}
+.qa-star-breath.strong {
+  animation: qaBreathStrong 1.8s ease-in-out infinite;
+}
+
+.qa-star-enter img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.qa-star-enter.interactive {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity .9s ease, transform .9s cubic-bezier(.22,.9,.3,1), filter .3s ease;
+}
+.qa-star-enter.interactive:hover {
+  filter: drop-shadow(0 0 30px var(--star-glow));
+}
+.qa-star-enter.interactive.flipped { filter: none; }
+.qa-star-enter.interactive.flipped img { opacity: .55; }
+
+.qa-card {
+  position: absolute;
+  width: 1900px; /* ★ 加宽 */
+  padding: 50px 100px 50px; /* ★ 减小上下内边距 */
+  max-height: 900px; /* ★ 兜底：如果实在太长，卡片内会出现滚动条 */
+  overflow-y: auto;
+  background: rgba(252,251,247,.98);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(60,80,140,.18),
+              inset 0 0 0 2px rgba(180,160,220,.15);
+  font-family: "Yozai","悠哉字体","Smiley Sans","得意黑",sans-serif;
+  color: #2a2a3e;
+  transform: scaleY(0);
+  transform-origin: top center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .7s cubic-bezier(.22,.9,.3,1), opacity .5s ease;
+  z-index: 20;
+  display: none;
+}
+.qa-card.open {
+  transform: scaleY(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.qa-card.closing {
+  transform: scaleY(1) translateX(200px);
+  opacity: 0;
+  transition: transform .45s cubic-bezier(.5,0,.5,1), opacity .4s ease;
+}
+.qa-card .qa-bar {
+  position: absolute;
+  left: 100px; top: 0;
+  width: 120px; height: 6px;
+  border-radius: 0 0 4px 4px;
+  transform: translateY(-100%);
+}
+.qa-card .qa-q {
+  font-size: 44px;
+  line-height: 1.5;
+  color: #3a4a7a;
+  margin-bottom: 24px;
+  letter-spacing: .04em;
+}
+.qa-card .qa-a {
+  font-size: 34px;
+  line-height: 1.85;
+  color: #5a5a6e;
+  padding-left: 90px;
+  letter-spacing: .03em;
+}
+.qa-card .qa-close {
+  position: absolute;
+  right: 40px; bottom: 30px;
+  font-size: 26px;
+  color: rgba(58,74,122,.4);
+  letter-spacing: .2em;
+  cursor: pointer;
+  transition: color .2s ease;
+  pointer-events: auto;
+}
+.qa-card .qa-close:hover { color: rgba(58,74,122,.85); }
+
+.qa-final {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  font-family: "Yozai","悠哉字体","Smiley Sans","得意黑",sans-serif;
+  font-size: 32px;
+  letter-spacing: .5em;
+  text-indent: .5em;
+  color: rgba(58,74,122,.45);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 1.5s ease, transform 1.5s ease;
+  pointer-events: none;
+  z-index: 15;
+}
+.qa-final.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ================================================================
+   彩蛋卡片内的特殊交互（强化版）
+   ================================================================ */
+.qa-a .speak-word {
+  color: #7fd8ff;
+  text-shadow: 0 0 10px rgba(127,216,255,.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.qa-a .speak-word:hover {
+  color: #fff;
+  text-shadow: 0 0 20px rgba(127,216,255,.9);
+}
+
+/* A2 的划掉：变成红色，加粗，加粗删除线 */
+.qa-a .strike-text {
+  color: #ff6b6b;
+  text-decoration: line-through;
+  text-decoration-color: #ff6b6b;
+  text-decoration-thickness: 4px;
+  opacity: 0.85;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+/* A3 的哈：变成一个小标签，鼠标放上去才触发特效 */
+.qa-a .laugh-char {
+  display: inline-block;
+  color: #fff;
+  background: #e8964a;
+  padding: 2px 10px;
+  border-radius: 6px;
+  cursor: pointer; /* 鼠标变成手型，提示可点击/悬停 */
+  transition: transform 0.25s ease, background 0.25s ease;
+  font-weight: bold;
+  margin-left: 6px;
+  font-size: 28px;
+  box-shadow: 0 2px 8px rgba(232,150,74,.4);
+}
+.qa-a .laugh-char:hover {
+  background: #ffb86c;
+  animation: floatCharAnim 0.8s cubic-bezier(.34,1.56,.64,1);
+}
+
 </style>
 </head>
 <body>
@@ -819,6 +1022,22 @@ const lidTop   = document.getElementById('lidTop');
 const lidBottom= document.getElementById('lidBottom');
 const ICON_OPEN = "url('睁眼.png')";
 const ICON_CLOSE= "url('闭眼.png')";
+
+/* ================================================================
+   ★ 隐藏机关追踪（用于最终彩蛋）
+   ================================================================ */
+const SECRET_TOTAL = 25;
+const SECRET_KEY = 'vs_secrets_found_v1';
+const FOUND = new Set();
+try {
+  const arr = JSON.parse(localStorage.getItem(SECRET_KEY) || '[]');
+  if (Array.isArray(arr)) arr.forEach(function(id){ FOUND.add(id); });
+} catch(e){}
+function markFound(id){
+  if (!id || FOUND.has(id)) return;
+  FOUND.add(id);
+  try { localStorage.setItem(SECRET_KEY, JSON.stringify(Array.from(FOUND))); } catch(e){}
+}
 
 /* ================================================================
    通用工具
@@ -934,7 +1153,7 @@ function stopPersistent(file){
 function startCicada(){
   if (musicUserMuted) return;   /* ★ 用户已静音 */
   if (persistentAudios['蝉鸣.mp3']) return;
-  playSfx('蝉鸣.mp3', {loop:true, volume:0.55, persistent:true});
+  playSfx('蝉鸣.mp3', {loop:true, volume:0.35, persistent:true});
   showGuitarBtn();
 }
 function stopCicada(){ stopPersistent('蝉鸣.mp3'); }
@@ -991,7 +1210,7 @@ function startCicadaFadeIn(dur){
   const a = playSfx('蝉鸣.mp3', {loop:true, volume:0, persistent:true});
   if (!a) return;
   showGuitarBtn();
-  const target = 0.55;
+  const target = 0.30;
   const t0 = performance.now();
   const iv = setInterval(function(){
     const p = Math.min(1, (performance.now() - t0) / dur);
@@ -1224,7 +1443,13 @@ function bgmForPage(idx){
     }
   }
 
-  /* 第十一屏第 2 页开始：无 BGM（交给吉他） */
+  /* 第十六屏 ~ 彩蛋页：蝉鸣开始后，简单.mp3 重新渐入，一直持续 */
+  if (sid === 's16' || sid === 's17' || sid === 's18' ||
+      sid === 's19' || sid === 's20' || sid === 'last' || sid === 'egg'){
+    return { file: '简单.mp3', vol: 0.20 };
+  }
+
+  /* 第十一屏第 2 页 ~ 第十五屏：无 BGM（交给吉他） */
   return null;
 }
 
@@ -1270,7 +1495,7 @@ function clearPrevTexts(currentRoot, fadeMs){
 /* ================================================================
    ★ 悬停替换文字：找到 el 里连续的 findText，悬停时换成 replaceText
    ================================================================ */
-function bindHoverReplace(el, findText, replaceText){
+function bindHoverReplace(el, findText, replaceText, onTrigger){
   const chars = el.querySelectorAll('.float-char');
   let startIdx = -1;
 
@@ -1344,7 +1569,10 @@ function bindHoverReplace(el, findText, replaceText){
   show();
   hide();
 
-  wrapper.addEventListener('mouseenter', show);
+  wrapper.addEventListener('mouseenter', function(){
+    if (onTrigger) onTrigger();
+    show();
+  });
   wrapper.addEventListener('mouseleave', hide);
 }
 
@@ -1384,7 +1612,7 @@ function bindShineSweep(el, findText){
 /* ================================================================
    ★ 悬停删除线：把 findText 这几个字加删除线，右侧挤进 insertText
    ================================================================ */
-function bindStrikethrough(el, findText, insertText){
+function bindStrikethrough(el, findText, insertText, onTrigger){
   const chars = el.querySelectorAll('.float-char');
   let startIdx = -1;
   for (let i = 0; i <= chars.length - findText.length; i++){
@@ -1430,6 +1658,7 @@ function bindStrikethrough(el, findText, insertText){
 
   /* ★ 悬停显示、离开隐藏 */
   wrapper.addEventListener('mouseenter', function(){
+    if (onTrigger) onTrigger();
     wrapper.classList.add('striking');
     insert.classList.add('show');
   });
@@ -1449,10 +1678,13 @@ function bindMouseTrail(ctx, ch, opt){
   const minGap   = (opt.minGap   != null) ? opt.minGap   : 90;
   const cooldown = (opt.cooldown != null) ? opt.cooldown : 160;
   const life     = (opt.life     != null) ? opt.life     : 1200;
+  const onFirst  = opt.onFirst;
 
   let lastX = -9999, lastY = -9999, lastT = 0;
+  let firstFired = false;
 
   function handler(e){
+    if (onFirst && !firstFired){ firstFired = true; onFirst(); }
     const now = performance.now();
     const dx = e.clientX - lastX;
     const dy = e.clientY - lastY;
@@ -1505,7 +1737,7 @@ function bindMouseTrail(ctx, ch, opt){
 /* ================================================================
    ★ 悬停弹出科普卡片：优先放右侧，放不下换左侧，再不行放下方
    ================================================================ */
-function bindHoverPopup(el, findText, html){
+function bindHoverPopup(el, findText, html, onTrigger){
   const chars = el.querySelectorAll('.float-char');
   let startIdx = -1;
 
@@ -1552,6 +1784,7 @@ function bindHoverPopup(el, findText, html){
   function show(){
     cancelHide();
     if (card) return;
+    if (onTrigger) onTrigger();
 
     card = document.createElement('div');
     card.className = 'hover-popup-card';
@@ -1598,7 +1831,7 @@ function bindHoverPopup(el, findText, html){
    ★ 光波：鼠标划过关键词时，9 个字依次发光上浮
    （完全不依赖 wrapper 尺寸，用 getBoundingClientRect 判定）
    ================================================================ */
-function bindMeteorShower(el, findText){
+function bindMeteorShower(el, findText, onTrigger){
   const chars = el.querySelectorAll('.float-char');
   let startIdx = -1;
 
@@ -1854,7 +2087,7 @@ function buildPage(idx, instant){
     if (def.bg.charAt(0) === '#'){
       root.style.background = def.bg;
     } else {
-      const bgImg = makeImg(def.bg + '.png',
+      const bgImg = makeImg(def.bg + '.jpg',
         {left:'0',top:'0',width:'100%',height:'100%',objectFit:'cover'}, def.bg);
       bgImg.dataset.noDebug = '1';
       root.appendChild(bgImg);
@@ -1965,6 +2198,32 @@ function buildPage(idx, instant){
   if (def.nextType) root._nextType = def.nextType;
   return root;
 }
+
+/* ================================================================
+   页面数据：封面 ~ 第七屏
+   ================================================================ */
+
+/* ================================================================
+   ★ 最终彩蛋：Q&A 内容
+   ================================================================ */
+const QA_LIST = [
+  { Q1: 'Who is speaking？',
+    A1: '不重要~因为你看到这里，就证明谁都可以用这种方式<span class="speak-word" data-alt="说话">speaking</span>~' },
+  { Q2: '为什么会做这个网页/作品/尝试？',
+    A2: '<span class="strike-text">精力无处安放。</span>主要是想探索融合媒介对文字表现力的提升。刚刚所呈现的故事，蓝本是一篇情节非常平淡、语言非常散的旧习作，正好用来练手！' },
+  { Q3: '最喜欢哪个机关/彩蛋？',
+    A3: '有很多。每一个机关和彩蛋都用了很多力气去设计和优化，所以每一个都很喜欢，不过感觉最有创意的是第三屏的鸽群切屏滑杆（想要复现视线移动的感觉）和第十八屏的“哈”字拖尾（想让眼睛帮耳朵听到大笑）<span class="laugh-char">哈</span>' },
+  { Q4: '制作过程中有没有崩溃的时刻？',
+    A4: '当然有。但其实整个过程是享受大于崩溃的。因为只有一点点Python基础，在二人团队（勉强算是）中只负责创意，而无论什么样天马行空的想法好像都有办法实现，所以尽情想象、指哪打哪的感觉当然很爽啊~' },
+  { Q5: '想要鸣谢谁？',
+    A5: '很多很多。非常感谢Pixabay的创作者们，感谢他们的共享精神~也感谢豆包，帮我生成了一条视频+若干参考图。超级感谢看到这里的你们。无论这个作品有多么不成熟，能和你们见面是我这一个多月以来最大的动力！特别感谢无所不能的技术顾问DeepSeek！所有代码都是蓝色大鲸鱼帮我写的，所有的文字内容、视觉呈现方案也都是和大鲸鱼一起讨论然后敲定的~<br><br><span style="font-size:24px;color:#8a95c0;line-height:1.6;display:flex;flex-wrap:wrap;gap:20px;">' +
+  '<span>🎵 鸣谢音效来源：</span>' +
+  '<span>harumachimusic · Joy of Flower Natural Guitars</span>' +
+  '<span>sarvegu · Cicale / Cicades</span>' +
+  '<span>mightuser_1 · The Pigeon Sound SFX</span>' +
+  '<span>Tomomi Kato · Improvisation 108</span>' +
+'</span>' }
+];
 
 /* ================================================================
    页面数据：封面 ~ 第七屏
@@ -2355,8 +2614,10 @@ SCREENS.push({ id:'prologue', pages:[
           void wordSpan.offsetWidth;
           wordSpan.classList.add('hovered');
           if (line.video){
+            markFound('prologue-measure');
             showOverlay(vRuler, true);
           } else if (line.image){
+            markFound('prologue-gate');
             showOverlay(gateImage, false);
           }
         });
@@ -2419,6 +2680,7 @@ SCREENS.push({ id:'prologue', pages:[
     manualWrap.appendChild(manualCard);
 
     lastBlock.addEventListener('mouseenter', function(){
+      markFound('prologue-manual');
       manualWrap.style.maxHeight = '600px';
       manualWrap.style.opacity   = '1';
       manualWrap.style.marginTop = '50px';
@@ -2521,8 +2783,8 @@ SCREENS.push({ id:'s1', pages:[
       {fontSize:68, tag:'s1p1_wake'},
       300
     );
-    bindMeteorShower(el, '简直就是幸福的化身');
-  }},
+    bindMeteorShower(el, '简直就是幸福的化身', function(){ markFound('s1-happy'); });
+    }},
     { bg:'深蓝色背景', build:function(ctx){
     const el = ctx.addText(
       '夜黑得没边，\n把所有人都盖在里面。\n静。\n在夜的深处，我的被子像是支起的一顶帐篷。\n这里面是一个明亮而轻盈的小天地，独属于我。',
@@ -2538,6 +2800,7 @@ SCREENS.push({ id:'s1', pages:[
         span.style.pointerEvents = 'auto';   /* .txt 默认 none，这里单独打开 */
         span.style.cursor = 'pointer';
         span.addEventListener('mouseenter', function(){
+          markFound('s1-quiet');
           span.textContent = '没有一点点声音';
         });
         span.addEventListener('mouseleave', function(){
@@ -2778,6 +3041,7 @@ SCREENS.push({ id:'s2', pages:[
       word.addEventListener('click', function(e){
         e.stopPropagation();
         playClick();
+        markFound('s2-lostmedia');
         showCard();
       });
     });
@@ -2927,6 +3191,7 @@ SCREENS.push({ id:'s2', pages:[
         if (fired) return;
         fired = true;
         playClick();
+        markFound('s2-yellowdot');
 
         /* 黄点消失 */
         clearInterval(breathe);
@@ -2965,6 +3230,19 @@ SCREENS.push({ id:'s2', pages:[
 
   { bg:null, keepPrev:true, build:function(ctx){
     clearPrevTexts(ctx.root, 200);
+
+    /* ★ 进入蓝点页时，清掉上一页所有残留的黄点（无论点没点过） */
+    scenes.querySelectorAll('.page:not([data-hidden]) .asset').forEach(function(a){
+      if (a.dataset.label && a.dataset.label.indexOf('黄点') === 0 && a.parentNode){
+        a._vanishing = true;
+        a.style.pointerEvents = 'none';
+        a.style.transition = 'opacity .5s ease, transform .5s ease';
+        a.style.opacity = '0';
+        a.style.transform = 'scale(.4)';
+        setTimeout(function(){ if (a.parentNode) a.remove(); }, 600);
+      }
+    });
+
     const allBlues = [];
     const safeBlues = [];   /* ★ 底边不侵入底部 UI 区的蓝点 */
     const stageRect0 = stage.getBoundingClientRect();
@@ -3019,6 +3297,7 @@ scenes.querySelectorAll('.page:not([data-hidden]) .asset').forEach(function(a){
       function fire(){
         if (triggered) return;
         triggered = true;
+        markFound('s2-bluedot');
         hint.style.transition = 'opacity .3s ease';
         hint.style.opacity = '0';
         ctx.after(300, function(){ if (hint.parentNode) hint.remove(); });
@@ -3143,7 +3422,8 @@ scenes.querySelectorAll('.page:not([data-hidden]) .asset').forEach(function(a){
       {y:720, fontSize:52, tag:'s2p4_text'}, 300);
     /* ★ 只保留 z-index，阴影回到 .txt 默认 */
     _s2p4.style.zIndex = '40';
-    bindHoverReplace(_s2p4, '还在拖延着不睁开眼。', '现在还躺在地板上。');
+    bindHoverReplace(_s2p4, '还在拖延着不睁开眼。', '现在还躺在地板上。',
+      function(){ markFound('s2-delay'); });
   }},
 
   { bg:null, keepPrev:true, build:function(ctx){
@@ -3218,7 +3498,7 @@ SCREENS.push({ id:'s3', pages:[
     }, '鸽群');
     flock.dataset.noDebug = '1';
     track.appendChild(flock);
-    const bg4 = makeImg('天台.png', {
+    const bg4 = makeImg('天台.jpg', {
       left:'5120px', top:'0', width:'2560px', height:'1440px', objectFit:'cover'
     }, '天台');
     bg4.dataset.noDebug = '1';
@@ -3421,7 +3701,8 @@ SCREENS.push({ id:'s4', pages:[
             tag: 's4p1_line' + (idx + 1)
           }, 0);
           if (idx === 1){
-            bindHoverReplace(el, '这是哪里？', '有那么一瞬间，我以为自己躺在海面的一条小船上。');
+            bindHoverReplace(el, '这是哪里？', '有那么一瞬间，我以为自己躺在海面的一条小船上。',
+              function(){ markFound('s4-where'); });
           }
         });
       });
@@ -3488,6 +3769,7 @@ SCREENS.push({ id:'s5', pages:[
     q.onclick = function(){
       if (opened) return;
       opened = true;
+      markFound('s5-question');
       q.style.transition = 'opacity .4s ease';
       q.style.opacity = '0';
       ctx.after(400, function(){ if (q.parentNode) q.remove(); });
@@ -3641,7 +3923,7 @@ SCREENS.push({ id:'s5', pages:[
       scroller.dataset.noDebug = '1';
 
       const img = document.createElement('img');
-      img.src = '群聊2.png';
+      img.src = '群聊2.jpg';
       img.alt = '';
       img.draggable = false;
       img.style.cssText =
@@ -3713,7 +3995,7 @@ SCREENS.push({ id:'s6', pages:[
         this.dataset.fb = '1';
         this.src = placeholder('地图');
       };
-      mapImg.src = '地图.png';
+      mapImg.src = '地图.jpg';
       win.appendChild(mapImg);
       ctx.root.appendChild(win);
       requestAnimationFrame(function(){
@@ -3729,6 +4011,7 @@ SCREENS.push({ id:'s6', pages:[
       function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
       win.addEventListener('mousedown', function(e){
+        markFound('s6-map');
         const s = getStageScale();
         dragging = true;
         sx = e.clientX; sy = e.clientY;
@@ -3887,7 +4170,7 @@ SCREENS.push({ id:'s7', pages:[
   }},
 
     { bg:'楼道2', build:function(ctx){
-    const bg3 = makeImg('楼道3.png', {
+    const bg3 = makeImg('楼道3.jpg', {
       left:'0', top:'0', width:'100%', height:'100%',
       objectFit:'cover',
       opacity:'0',
@@ -3928,7 +4211,7 @@ SCREENS.push({ id:'s7', pages:[
     ctx.addText('“又来？！”',{fontSize:76},300);
   }},
   { bg:'楼道3', build:function(ctx){
-    const avatar = ctx.addImg('A头像.png', {left:'50%', top:'46%', width:'380px', height:'380px',
+    const avatar = ctx.addImg('A头像.jpg', {left:'50%', top:'46%', width:'380px', height:'380px',
       objectFit:'contain', transform:'translate(-50%,-50%)', cursor:'pointer',
       filter:'drop-shadow(0 20px 50px rgba(0,0,0,.6))', transition:'transform .3s ease'}, 'A头像');
     avatar.style.pointerEvents = 'auto';
@@ -3952,7 +4235,8 @@ SCREENS.push({ id:'s7', pages:[
     avatar.onclick = function(){
       if (recOpen) return;
       recOpen = true;
-      const rec = ctx.addImg('聊天记录.png', {
+      markFound('s7-avatar');
+      const rec = ctx.addImg('聊天记录.jpg', {
         left:'50%', top:'50%', width:'1000px', height:'900px',
         objectFit:'contain', transform:'translate(-50%,-50%) scale(.9)', opacity:'0',
         transition:'opacity .5s ease, transform .5s cubic-bezier(.3,1.2,.5,1)',
@@ -4007,6 +4291,7 @@ function attachHover(lastEl){
   lastEl.style.pointerEvents = 'auto';  lastEl.style.cursor = 'pointer';
 
   lastEl.addEventListener('mouseenter', function(){
+    markFound('s7-middle');
     follow.style.transition = 'opacity .4s ease, transform .4s ease';
     follow.style.opacity    = '1';
     follow.style.transform  = 'translate(-50%, -50%) translateY(0)';
@@ -4063,7 +4348,8 @@ SCREENS.push({ id:'s8', pages:[
           tag: 's8p1_line' + (i + 1)
         }, 0);
         if (i === 3){
-          bindHoverReplace(el, '这团闷气不是因为被A鸽了，', 'A的头，薛定谔的痛。');
+          bindHoverReplace(el, '这团闷气不是因为被A鸽了，', 'A的头，薛定谔的痛。',
+            function(){ markFound('s8-anger'); });
         }
       });
     });
@@ -4097,14 +4383,16 @@ SCREENS.push({ id:'s8', pages:[
           bindHoverReplace(el, '“······嗯。”', '颜色真好看啊。');
         }
         if (i === 3){
-          bindHoverReplace(el, '“······”', '为什么没有天蓝色的果汁呢？');
+          bindHoverReplace(el, '“······”', '为什么没有天蓝色的果汁呢？',
+            function(){ markFound('s8-juice'); });
         }
       });
     });
   }},
     { bg:'超市', build:function(ctx){
     const el = ctx.addText('准备离开超市的时候，\n小A的消息跳出来：',{x:1780, y:720, fontSize:59, tag:'s8p5_text'},300);
-    bindHoverReplace(el, '准备离开超市的时候，', '自动门都比A积极。');
+    bindHoverReplace(el, '准备离开超市的时候，', '自动门都比A积极。',
+      function(){ markFound('s8-door'); });
   }},
 
   { bg:'自动门', build:function(ctx){
@@ -4315,6 +4603,7 @@ SCREENS.push({ id:'s10', pages:[
       excl.onclick = function(){
         if (opened) return;
         opened = true;
+        markFound('s11-noodle');
         excl.style.transition = 'opacity .5s ease, transform .5s ease';
         excl.style.opacity = '0';
         excl.style.transform = 'translate(-50%,-50%) scale(1.6)';
@@ -4328,8 +4617,10 @@ SCREENS.push({ id:'s10', pages:[
     });
   }},
   { bg:'石凳', build:function(ctx){
+    let songHint = null;
+
     ctx.after(2000, function(){
-      const song = ctx.addImg('放歌.png', {left:'75%', top:'38%', width:'420px', height:'420px',
+      const song = ctx.addImg('放歌.jpg', {left:'75%', top:'38%', width:'420px', height:'420px',
         objectFit:'contain', transform:'translate(-50%,-50%) scale(.8)', opacity:'0',
         transition:'opacity .6s ease, transform .6s cubic-bezier(.3,1.3,.5,1)'}, '放歌');
       requestAnimationFrame(function(){
@@ -4340,14 +4631,42 @@ SCREENS.push({ id:'s10', pages:[
       song.style.pointerEvents = 'auto';
       song.style.cursor = 'pointer';
       song.dataset.noDebug = '1';
+
+      /* ★ 加入提示文字 */
+      songHint = ctx.addText('放歌听~放歌放歌！', {
+        x: 1920,           /* 75% of 2560 */
+        y: 860,            /* 图片下方 */
+        width: 'auto',
+        fontSize: 36,
+        color: 'rgba(255,255,255,.65)',
+        textShadow: '0 4px 20px rgba(0,0,0,.8)',
+        noIndent: true
+      }, 400);
+
+      songHint.style.pointerEvents = 'auto';
+      songHint.style.cursor = 'pointer';
+      songHint.style.transition = 'color .3s ease, opacity .3s ease';
+
+      songHint.addEventListener('mouseenter', function(){ songHint.style.color = '#fff'; });
+      songHint.addEventListener('mouseleave', function(){ songHint.style.color = 'rgba(255,255,255,.65)'; });
+
+      /* 点击文字也能开/关音乐 */
+      songHint.addEventListener('click', function(e){
+        e.stopPropagation();
+        song.click();
+      });
+
       song.addEventListener('click', function(e){
         e.stopPropagation();
+        markFound('s11-music');
         if (persistentAudios['吉他.mp3']){
           stopGuitar(0);
           song.style.filter = 'grayscale(1) brightness(0.65)';
+          if (songHint) songHint.textContent = '放歌听~放歌放歌！';
         } else {
           startGuitar();
           song.style.filter = '';
+          if (songHint) songHint.textContent = '正在播放...';
         }
       });
     });
@@ -4423,7 +4742,8 @@ SCREENS.push({ id:'s12', pages:[
       x: 2380, y: 800, anchor: 'right', width: 1800,
       fontSize: 52, noIndent: true, tag: 's12p1_line3'
     }, T3_START);
-    bindStrikethrough(line3, '捡垃圾吃', '吃我们捡来的垃圾');
+    bindStrikethrough(line3, '捡垃圾吃', '吃我们捡来的垃圾',
+      function(){ markFound('s12-trash'); });
 
     /* ---- 4. 第四句：右下角 ---- */
     const T4_START = T3_START + 900;
@@ -4760,6 +5080,7 @@ SCREENS.push({ id:'s13', pages:[
       if (!line2El) return;
       line2El.style.pointerEvents = 'auto';
       line2El.addEventListener('mouseenter', function(){
+        markFound('s13-ask');
         const r = line2El.getBoundingClientRect();
         const stageRect = stage.getBoundingClientRect();
         const s = getStageScale();
@@ -4950,6 +5271,21 @@ SCREENS.push({ id:'s14', pages:[
   { bg:'扔垃圾', build:function(ctx){
     const d = ctx.addText('对了！', {x:1280, y:720, width:'auto', fontSize:80, noIndent:true}, 300);
     d.classList.add('clickable');
+
+    /* ★ 单独给感叹号上色 */
+    const dChars = d.querySelectorAll('.float-char');
+    if (dChars.length){
+      const lastCh = dChars[dChars.length - 1];
+      if (/[！!]/.test(lastCh.textContent)){
+        lastCh.style.color = '#e8964a';   /* 橙色 */
+        lastCh.style.textShadow =
+          '0 0 30px rgba(232,150,74,.85),' +
+          ' 0 0 60px rgba(232,150,74,.45)';
+        lastCh.style.display = 'inline-block';
+        lastCh.style.animation = 'exclPulse 1.6s ease-in-out infinite';
+      }
+    }
+
     let opened = false;
     d.onclick = function(){
       if (opened) return;
@@ -5017,7 +5353,8 @@ SCREENS.push({ id:'s17', pages:[
         '气生根是植物茎上长出的、暴露在空气中的不定根。' +
         '榕树的气生根尤其发达，会从枝干垂下，接触土壤后逐渐增粗，' +
         '成为支撑树冠的"支柱根"，年复一年甚至能长成一片"独木林"。' +
-      '</div>'
+      '</div>',
+      function(){ markFound('s17-loveroot'); }
     );
   }},
   { bg:'树藤秋千', build:function(ctx){
@@ -5096,9 +5433,10 @@ SCREENS.push({ id:'s18', pages:[
 
     /* ★ 鼠标划过处冒出"哈"字（稀疏、随机大小/旋转、淡出） */
     bindMouseTrail(ctx, '哈', {
-      minGap: 90,        /* 移动距离阈值：px，越大越稀疏 */
-      cooldown: 160,     /* 时间间隔：ms，越大越稀疏 */
-      life: 1200         /* 每个字存活时长：ms */
+      minGap: 90,
+      cooldown: 160,
+      life: 1200,
+      onFirst: function(){ markFound('s18-laugh'); }
     });
   }},
       { bg:'狂笑三人', build:function(ctx){
@@ -5107,8 +5445,9 @@ SCREENS.push({ id:'s18', pages:[
       {fontSize:54, tag:'s18p2_text'},
       300
     );
-    /* ★ 悬停"我仰躺在地" → 显示"笑的海浪里，友谊的小船说翻就翻。" */
-    bindHoverReplace(el, '我仰躺在地，反而比几乎笑倒在地的人先缓过来了。', '友谊的小船说翻就翻。');
+    /* ★ 悬停"我仰躺在地" → 显示"友谊的小船说翻就翻。" */
+    bindHoverReplace(el, '我仰躺在地，反而比几乎笑倒在地的人先缓过来了。', '笑声的海浪里，友谊的小船说翻就翻。',
+      function(){ markFound('s18-friendship'); });
   }}
 ]});
 
@@ -5166,7 +5505,7 @@ SCREENS.push({ id:'s20', pages:[
 
     const BG_NAMES = ['天蓝色背景1','天蓝色背景2','天蓝色背景3','天蓝色背景4'];
     const bgLayers = BG_NAMES.map(function(name, i){
-      const img = makeImg(name + '.png', {
+      const img = makeImg(name + '.jpg', {
         left:'0', top:'0', width:'100%', height:'100%', objectFit:'cover',
         opacity: i === 0 ? '1' : '0',
         transition: 'opacity 2s ease'
@@ -5222,7 +5561,7 @@ SCREENS.push({ id:'last', pages:[
     ctx.after(200, function(){ playSfx('旋律.mp3', {volume:0.7}); });
 
     /* ---- 天空层 ---- */
-    const skyLayer = makeImg('天蓝色背景4.png', {
+    const skyLayer = makeImg('天蓝色背景4.jpg', {
       left:'0', top:'0', width:'100%', height:'100%', objectFit:'cover'
     }, '天蓝色背景4');
     skyLayer.dataset.noDebug = '1';
@@ -5235,7 +5574,7 @@ SCREENS.push({ id:'last', pages:[
       'position:absolute;inset:0;z-index:2;will-change:opacity;';
     ctx.root.appendChild(roomLayer);
 
-    const roomBg = makeImg('房间.png', {
+    const roomBg = makeImg('房间.jpg', {
       left:'0', top:'0', width:'100%', height:'100%', objectFit:'cover'
     }, '房间');
     roomBg.dataset.noDebug = '1';
@@ -5475,9 +5814,9 @@ SCREENS.push({ id:'last', pages:[
           breatheRaf = null;
           return;
         }
-        const t = (performance.now() - breatheT0) / 900;
+        const t = (performance.now() - breatheT0) / 1000;
         /* 幅度 3.5%，周期 0.9 秒 */
-        breatheFactor = 1 + 0.035 * Math.sin(t * Math.PI * 2);
+        breatheFactor = 1 + 0.095 * Math.sin(t * Math.PI * 2);
         applyLeafAtL(curL);
         breatheRaf = requestAnimationFrame(step);
       }
@@ -5741,7 +6080,7 @@ SCREENS.push({ id:'last', pages:[
         'position:absolute;left:50%;top:50%;' +
         'transform:translate(-50%,-50%) scale(.82);' +
         'font-family:"Yozai","悠哉字体","Smiley Sans","得意黑",sans-serif;' +
-        'font-size:100px;' +
+        'font-size:70px;' +
         'letter-spacing:.12em;' +
         'line-height:1.75;' +
         'text-align:center;' +
@@ -5766,71 +6105,71 @@ SCREENS.push({ id:'last', pages:[
    ================================================================ */
 SCREENS.push({ id:'egg', pages:[
   { bg:'朋友圈', build:function(ctx){
-    stopCicadaFadeOut(2600);   /* ★ 蝉鸣在 2.6 秒内缓缓消失 */
+    stopCicadaFadeOut(2600);
     stopAllTransient();
     stopGuitar(0);
 
-    const BG_IMG  = '朋友圈.png';
+    const BG_IMG  = '朋友圈.jpg';
     const HS_SIZE = 400;
 
     let HOTSPOTS = [
-      { id:'T1', img:'T1.png', x: 910,  y: 5115 },
-      { id:'T2', img:'T2.png', x: 1408, y: 5124 },
-      { id:'T3', img:'T3.png', x: 913,  y: 5609 },
-      { id:'T4', img:'T4.png', x: 1402, y: 5603 },
-      { id:'A',  img:'A.png',  x: 1170, y: 1897 },
-      { id:'E',  img:'E.png',  x: 989,  y: 467  }
+      { id:'T1', img:'T1.jpg', x: 910,  y: 5115 },
+      { id:'T2', img:'T2.jpg', x: 1408, y: 5124 },
+      { id:'T3', img:'T3.jpg', x: 913,  y: 5609 },
+      { id:'T4', img:'T4.jpg', x: 1402, y: 5603 },
+      { id:'A',  img:'A.jpg',  x: 1170, y: 1897 },
+      { id:'E',  img:'E.jpg',  x: 989,  y: 467  }
     ];
 
-
+    /* ================================================================
+       朋友圈滚动容器：只装朋友圈图，高度 = 图高
+       ================================================================ */
     const scroll = document.createElement('div');
     scroll.id = 'eggScroll';
     scroll.dataset.noDebug = '1';
+    scroll.style.cssText =
+      'position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;' +
+      'pointer-events:auto;-webkit-overflow-scrolling:touch;' +
+      'touch-action:pan-y;background:#e8e9ec;z-index:10;';
+    ctx.root.appendChild(scroll);
 
     const inner = document.createElement('div');
     inner.className = 'eggInner';
+    inner.style.cssText =
+      'position:relative;width:2560px;margin:0 auto;background:#e8e9ec;';
     scroll.appendChild(inner);
+
+    let bgH = 7608;
 
     const bg = document.createElement('img');
     bg.className = 'eggBg';
     bg.alt = '';
-    bg.onload = function(){
-      const h = bg.naturalHeight * (2560 / bg.naturalWidth);
-      inner.style.height = (Math.max(h, 6000) + 800) + 'px';
-    };
-    bg.onerror = function(){
-      if (this.dataset.fb) return;
-      this.dataset.fb = '1';
-      this.src = placeholder('朋友圈背景');
-      inner.style.height = '6800px';
-    };
-    bg.src = BG_IMG;
-    inner.appendChild(bg);
+    bg.style.cssText =
+      'position:absolute;left:0;top:0;width:2560px;height:auto;display:block;' +
+      'pointer-events:none;user-select:none;-webkit-user-drag:none;';
 
-    const backBtn = document.createElement('button');
+    /* 返回按钮（随 inner 走，紧贴朋友圈图底部） */
+    let backBtn = document.createElement('button');
     backBtn.type = 'button';
     backBtn.textContent = '回到序言';
     backBtn.style.cssText =
-      'position:absolute;left:50%;bottom:260px;' +
+      'position:absolute;left:50%;top:7468px;' +
       'transform:translateX(-50%);' +
       'padding:24px 72px;border-radius:999px;border:none;' +
       'background:rgba(242,244,250,.95);color:#3a4a7a;' +
       'font-family:inherit;font-size:34px;letter-spacing:.15em;' +
       'cursor:pointer;pointer-events:auto;' +
       'box-shadow:0 16px 50px rgba(60,80,140,.22);' +
-      'transition:transform .2s ease, box-shadow .2s ease;';
+      'transition:transform .2s ease, box-shadow .2s ease;' +
+      'z-index:30;';
     backBtn.addEventListener('mouseenter', function(){
       backBtn.style.transform = 'translateX(-50%) translateY(-4px)';
       backBtn.style.boxShadow = '0 24px 60px rgba(60,80,140,.32)';
+      backBtn.textContent = '下次打开，还是今天。';
     });
     backBtn.addEventListener('mouseleave', function(){
       backBtn.style.transform = 'translateX(-50%)';
       backBtn.style.boxShadow = '0 16px 50px rgba(60,80,140,.22)';
-    });
-        backBtn.addEventListener('mouseenter', function(){
-      backBtn.textContent = '下次打开，还是今天。';
-    });
-    backBtn.addEventListener('mouseleave', function(){
       backBtn.textContent = '回到序言';
     });
     backBtn.addEventListener('click', function(){
@@ -5840,6 +6179,41 @@ SCREENS.push({ id:'egg', pages:[
     });
     inner.appendChild(backBtn);
 
+    bg.onload = function(){
+      const h = bg.naturalHeight * (2560 / bg.naturalWidth);
+      bgH = Math.max(h, 2000);
+      inner.style.height = bgH + 'px';
+      backBtn.style.top = (bgH - 140) + 'px';
+    };
+    bg.onerror = function(){
+      if (this.dataset.fb) return;
+      this.dataset.fb = '1';
+      this.src = placeholder('朋友圈背景');
+      bgH = 6800;
+      inner.style.height = bgH + 'px';
+      backBtn.style.top = (bgH - 140) + 'px';
+    };
+    bg.src = BG_IMG;
+    inner.appendChild(bg);
+
+    /* ---- 热区 ---- */
+    const hsEls = [];
+    HOTSPOTS.forEach(function(hs){
+      const el = document.createElement('div');
+      el.className = 'egg-hotspot';
+      el.style.cssText =
+        'left:' + hs.x + 'px;top:' + hs.y + 'px;' +
+        'width:' + HS_SIZE + 'px;height:' + HS_SIZE + 'px;';
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        playClick();
+        showLightbox(hs.img);
+      });
+      inner.appendChild(el);
+      hsEls.push(el);
+    });
+
+    /* lightbox */
     let lb = document.getElementById('lightbox');
     if (!lb){
       lb = document.createElement('div');
@@ -5854,25 +6228,389 @@ SCREENS.push({ id:'egg', pages:[
       lb.classList.add('on');
     }
 
-    let editMode = false;
-    const hsEls = [];
+    /* ================================================================
+       ★ 点阵层：独立浮在整个页面之上，解锁后淡入覆盖
+       ================================================================ */
+    const qaZone = document.createElement('div');
+    qaZone.style.cssText =
+      'position:absolute;inset:0;' +
+      'background:#e8e9ec;' +
+      'z-index:200;' +
+      'opacity:0;pointer-events:none;' +
+      'transition:opacity .8s ease;';
+    ctx.root.appendChild(qaZone);
 
-    HOTSPOTS.forEach(function(hs){
-      const el = document.createElement('div');
-      el.className = 'egg-hotspot';
-      el.style.cssText =
-        'left:' + hs.x + 'px;top:' + hs.y + 'px;' +
-        'width:' + HS_SIZE + 'px;height:' + HS_SIZE + 'px;';
-      el.addEventListener('click', function(e){
-        e.stopPropagation();
-        playClick();
-        showLightbox(hs.img);
-      });
-      inner.appendChild(el);
+    /* ---- 标题 ---- */
+    const qaTitle = document.createElement('div');
+    qaTitle.className = 'qa-title';
+    qaTitle.style.top = '50px';
+    qaTitle.innerHTML =
+      '你发现了 <span class="num">' +
+      Math.min(FOUND.size, SECRET_TOTAL) +
+      '</span> / ' + SECRET_TOTAL + ' 个机关';
+    qaZone.appendChild(qaTitle);
+
+    /* ---- 点阵容器 ---- */
+    const starfield = document.createElement('div');
+    starfield.className = 'qa-starfield';
+    starfield.style.width = '2560px';
+    starfield.style.height = '1440px';
+    qaZone.appendChild(starfield);
+
+    /* ---- 网格参数（全部在一屏内） ---- */
+    const GRID_COLS = 12;
+    const GRID_ROWS = 8;
+    const GRID_TOP = 220;
+    const GRID_BOTTOM = 1180;
+    const cellW = 2560 / GRID_COLS;
+    const cellH = (GRID_BOTTOM - GRID_TOP) / GRID_ROWS;
+
+    function cellPos(r, c){
+      return {
+        x: (c + 0.5) * cellW,
+        y: GRID_TOP + (r + 0.5) * cellH
+      };
+    }
+
+    /* 彩点弧线：左低中高右低 */
+    const colorXs = [200, 750, 1280, 1810, 2360];
+    const colorYs = colorXs.map(function(x){
+      const d = (x - 1280) / 1080;
+      return 380 + 200 * d * d;
     });
 
-    ctx.root.appendChild(scroll);
+    function findNearestCell(x, y){
+      let bestR = 0, bestC = 0, bestD = Infinity;
+      for (let r = 0; r < GRID_ROWS; r++){
+        for (let c = 0; c < GRID_COLS; c++){
+          const p = cellPos(r, c);
+          const d = (p.x - x) ** 2 + (p.y - y) ** 2;
+          if (d < bestD){ bestD = d; bestR = r; bestC = c; }
+        }
+      }
+      return { r: bestR, c: bestC };
+    }
 
+    const INTERACTIVE = [
+      { color: '红点', hex: '#e05a6a' },
+      { color: '绿点', hex: '#5aa05a' },
+      { color: '青点', hex: '#3aa0b0' },
+      { color: '粉点', hex: '#ff69b4' },
+      { color: '白点', hex: '#e8964a' }
+    ];
+    const INTERACTIVE_SIZE = 170;
+    const TOTAL_STARS = INTERACTIVE.length;
+    const interactiveStars = [];
+
+    const colorCellMap = new Map();
+    colorXs.forEach(function(x, i){
+      const cell = findNearestCell(x, colorYs[i]);
+      const key = cell.r + '_' + cell.c;
+      if (!colorCellMap.has(key)) colorCellMap.set(key, i);
+    });
+
+    /* 蓝黄网格点 */
+    const BG_CFG = [
+      { sizeMin: 70,  sizeMax: 95,  opacity: 0.45 },
+      { sizeMin: 105, sizeMax: 130, opacity: 0.72 },
+      { sizeMin: 145, sizeMax: 170, opacity: 1.00 }
+    ];
+
+    for (let r = 0; r < GRID_ROWS; r++){
+      for (let c = 0; c < GRID_COLS; c++){
+        const key = r + '_' + c;
+        if (colorCellMap.has(key)) continue;
+        const p = cellPos(r, c);
+        const cfg = BG_CFG[(r + c) % 3];
+        const size = cfg.sizeMin + Math.random() * (cfg.sizeMax - cfg.sizeMin);
+        const colorName = Math.random() < 0.55 ? '蓝点' : '黄点';
+
+        const enter = document.createElement('div');
+        enter.className = 'qa-star-enter';
+        enter.style.cssText =
+          'left:' + (p.x - size/2) + 'px;' +
+          'top:'  + (p.y - size/2) + 'px;' +
+          'width:' + size + 'px;height:' + size + 'px;';
+        const breath = document.createElement('div');
+        breath.className = 'qa-star-breath';
+        breath.style.animationDelay = (-Math.random() * 4) + 's';
+        const img = document.createElement('img');
+        img.src = colorName + '.png';
+        img.alt = '';
+        img.draggable = false;
+        img.style.opacity = String(cfg.opacity);
+        breath.appendChild(img);
+        enter.appendChild(breath);
+        starfield.appendChild(enter);
+      }
+    }
+
+    /* 彩点 */
+    colorCellMap.forEach(function(colorIdx, key){
+      const parts = key.split('_');
+      const r = parseInt(parts[0], 10);
+      const c = parseInt(parts[1], 10);
+      const p = cellPos(r, c);
+      const item = INTERACTIVE[colorIdx];
+      const size = INTERACTIVE_SIZE;
+
+      const enter = document.createElement('div');
+      enter.className = 'qa-star-enter interactive';
+      enter.style.cssText =
+        'left:' + (p.x - size/2) + 'px;' +
+        'top:'  + (p.y - size/2) + 'px;' +
+        'width:' + size + 'px;height:' + size + 'px;' +
+        '--star-glow:' + item.hex + ';';
+      enter.dataset.idx = String(colorIdx);
+
+      const breath = document.createElement('div');
+      breath.className = 'qa-star-breath strong';
+      breath.style.animationDelay = (-Math.random() * 2) + 's';
+
+      const img = document.createElement('img');
+      img.src = item.color + '.png';
+      img.alt = '';
+      img.draggable = false;
+
+      breath.appendChild(img);
+      enter.appendChild(breath);
+      starfield.appendChild(enter);
+      interactiveStars.push({ el: enter, img: img, point: p, idx: colorIdx });
+    });
+
+    /* 卡片容器 */
+    const cardContainer = document.createElement('div');
+    cardContainer.style.cssText =
+      'position:absolute;left:0;top:0;width:100%;height:100%;' +
+      'pointer-events:none;z-index:20;';
+    qaZone.appendChild(cardContainer);
+
+    /* “完” */
+    const qaFinal = document.createElement('div');
+    qaFinal.className = 'qa-final';
+    qaFinal.textContent = '—— 完 ——';
+    qaFinal.style.top = (GRID_BOTTOM + 60) + 'px';
+    qaFinal.style.display = 'none';
+    qaZone.appendChild(qaFinal);
+
+    /* 卡片逻辑 */
+    const CARD_W = 1600;
+    const cardEls = {};
+    let currentCard = null;
+
+    function closeCurrentCard(cb){
+      if (!currentCard){ if (cb) cb(); return; }
+      const card = currentCard;
+      currentCard = null;
+      card.classList.remove('open');
+      card.classList.add('closing');
+      setTimeout(function(){
+        card.classList.remove('closing');
+        card.style.display = 'none';
+        if (cb) cb();
+      }, 450);
+    }
+
+    function showCard(idx, point){
+      let card = cardEls[idx];
+      if (!card){
+        card = document.createElement('div');
+        card.className = 'qa-card';
+        var n = idx + 1;
+        card.innerHTML =
+          '<div class="qa-bar" style="background:' + INTERACTIVE[idx].hex + ';"></div>' +
+          '<div class="qa-q">Q' + n + '. ' + QA_LIST[idx]['Q' + n] + '</div>' +
+          '<div class="qa-a">' + QA_LIST[idx]['A' + n] + '</div>' +
+          '<div class="qa-close">收起</div>';
+        cardContainer.appendChild(card);
+        cardEls[idx] = card;
+        card.querySelector('.qa-close').addEventListener('click', function(e){
+          e.stopPropagation();
+          closeCurrentCard();
+        });
+
+        /* ★ 1. 处理 speaking 的悬停替换 */
+        const speakWord = card.querySelector('.speak-word');
+        if (speakWord) {
+          speakWord.addEventListener('mouseenter', function() {
+            this.textContent = this.dataset.alt;
+          });
+          speakWord.addEventListener('mouseleave', function() {
+            this.textContent = 'speaking';
+          });
+        }
+
+        /* ★ 2. 处理 "哈" 字的飘字拖尾 */
+        const laughChar = card.querySelector('.laugh-char');
+        if (laughChar) {
+          laughChar.addEventListener('mouseenter', function(e) {
+            const rect = laughChar.getBoundingClientRect();
+            const stageRect = stage.getBoundingClientRect();
+            const scale = getStageScale();
+            
+            // 在点击位置生成几个飘散的小“哈”字
+            for (let i = 0; i < 4; i++) {
+              const el = document.createElement('div');
+              el.textContent = '哈';
+              const rx = rect.left + rect.width / 2 + (Math.random() - 0.5) * 100;
+              const ry = rect.top + rect.height / 2 + (Math.random() - 0.5) * 50;
+              
+              const x = (rx - stageRect.left) / scale;
+              const y = (ry - stageRect.top) / scale;
+              
+              el.style.cssText = 
+                'position:absolute;left:' + x + 'px;top:' + y + 'px;' +
+                'transform:translate(-50%,-50%) scale(0.5);' +
+                'font-size:' + (40 + Math.random()*40) + 'px;' +
+                'color:#ffe9a0;pointer-events:none;z-index:100;' +
+                'text-shadow:0 0 20px rgba(255,220,120,.8);' +
+                'opacity:1;transition:all 1.2s cubic-bezier(.2,.8,.4,1);';
+              ctx.root.appendChild(el);
+              
+              requestAnimationFrame(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translate(' + (Math.random() - 0.5) * 100 + 'px, -' + (50 + Math.random()*100) + 'px) scale(1.2) rotate(' + (Math.random()-0.5)*45 + 'deg)';
+              });
+              
+              setTimeout(() => el.remove(), 1300);
+            }
+          });
+        }
+      }
+
+      const CARD_W_NEW = 1900; // 对应 CSS 里的新宽度
+      let left = point.x - CARD_W_NEW / 2;
+      left = Math.max(60, Math.min(2560 - CARD_W_NEW - 60, left));
+      card.style.left = left + 'px';
+      
+      // ★ 先显示出来，测量实际高度
+      card.style.display = 'block';
+      card.style.top = '-9999px'; // 临时移出屏幕
+      const cardH = card.offsetHeight; 
+
+      // ★ 动态计算 top，保证不超出屏幕底部和顶部
+      let top = point.y + 160;
+      if (top + cardH > 1440 - 40) {
+        top = 1440 - 40 - cardH; // 贴底
+      }
+      if (top < 40) top = 40; // 贴顶
+
+      card.style.top = top + 'px';
+      
+      requestAnimationFrame(function(){ card.classList.add('open'); });
+      currentCard = card;
+    }
+
+
+    /* 点击彩点 */
+    let flippedCount = 0;
+    interactiveStars.forEach(function(star){
+      star.el.addEventListener('click', function(e){
+        e.stopPropagation();
+        const wasFlipped = star.el.classList.contains('flipped');
+        if (!wasFlipped){
+          star.el.classList.add('flipped');
+          star.img.style.transition = 'transform .3s ease, opacity .3s ease';
+          star.img.style.transform = 'rotateY(90deg)';
+          setTimeout(function(){
+            star.img.style.opacity = '0.55';
+            star.img.style.transform = 'rotateY(0deg)';
+          }, 300);
+          flippedCount++;
+          if (flippedCount >= TOTAL_STARS){
+            setTimeout(function(){
+              qaFinal.style.display = 'block';
+              requestAnimationFrame(function(){ qaFinal.classList.add('on'); });
+            }, 1200);
+          }
+        }
+        closeCurrentCard(function(){ showCard(star.idx, star.point); });
+      });
+    });
+
+    /* 点空白处收起 */
+    qaZone.addEventListener('click', function(e){
+      if (e.target === qaZone || e.target === starfield){
+        closeCurrentCard();
+      }
+    });
+
+    /* 关闭点阵，回到朋友圈 */
+    const qaClose = document.createElement('button');
+    qaClose.type = 'button';
+    qaClose.textContent = '×';
+    qaClose.style.cssText =
+      'position:absolute;left:60px;top:40px;z-index:30;' +
+      'width:64px;height:64px;border-radius:50%;border:none;' +
+      'background:rgba(58,74,122,.12);color:#3a4a7a;' +
+      'font-size:40px;line-height:1;cursor:pointer;' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'transition:background .2s;opacity:0;pointer-events:none;';
+    qaClose.addEventListener('mouseenter', function(){ qaClose.style.background = 'rgba(58,74,122,.25)'; });
+    qaClose.addEventListener('mouseleave', function(){ qaClose.style.background = 'rgba(58,74,122,.12)'; });
+    qaClose.addEventListener('click', function(){
+      qaZone.style.pointerEvents = 'none';
+      qaZone.style.opacity = '0';
+      qaClose.style.opacity = '0';
+      qaClose.style.pointerEvents = 'none';
+      qaTitle.classList.remove('on');
+      qaFinal.classList.remove('on');
+      qaFinal.style.display = 'none';
+      Array.from(starfield.querySelectorAll('.qa-star-enter')).forEach(function(el){
+        el.classList.remove('on');
+        el.classList.remove('flipped');
+      });
+      interactiveStars.forEach(function(s){
+        s.img.style.opacity = '';
+        s.img.style.transform = '';
+      });
+      closeCurrentCard();
+      qaUnlocked = false;
+      rollCount = 0;
+      lastRollTime = 0;
+      flippedCount = 0;
+    });
+    qaZone.appendChild(qaClose);
+
+    /* ---- 解锁逻辑：滚到底再滑 2 次 ---- */
+    const ROLL_THRESHOLD = 2;
+    const ROLL_COOLDOWN = 700;
+    let rollCount = 0;
+    let lastRollTime = 0;
+    let qaUnlocked = false;
+
+    function unlockQA(){
+      if (qaUnlocked) return;
+      qaUnlocked = true;
+
+      qaZone.style.pointerEvents = 'auto';
+      qaZone.style.opacity = '1';
+      qaClose.style.opacity = '1';
+      qaClose.style.pointerEvents = 'auto';
+
+      setTimeout(function(){
+        qaTitle.classList.add('on');
+        const allStars = Array.from(starfield.querySelectorAll('.qa-star-enter'));
+        allStars.forEach(function(el, i){
+          setTimeout(function(){ el.classList.add('on'); }, Math.min(1500, i * 12));
+        });
+      }, 400);
+    }
+
+    scroll.addEventListener('wheel', function(e){
+      if (qaUnlocked) return;
+      if (e.deltaY <= 0) return;
+      const atBottom = scroll.scrollTop + scroll.clientHeight >= scroll.scrollHeight - 30;
+      if (!atBottom) return;
+      e.preventDefault();
+
+      const now = performance.now();
+      if (now - lastRollTime < ROLL_COOLDOWN) return;
+      lastRollTime = now;
+
+      rollCount++;
+      if (rollCount >= ROLL_THRESHOLD) unlockQA();
+    }, { passive: false });
   }}
 ]});
 
@@ -6424,7 +7162,7 @@ try {
    ================================================================ */
 function preloadAllAssets() {
   const scriptContent = document.documentElement.innerHTML;
-  const regex = /['"]([^'"]+\.(png|mp4|mp3))['"]/g;
+  const regex = /['"]([^'"]+\.(png|jpg|jpeg|webp|mp4|mp3|ttf|woff2))['"]/g;
   let match;
   const assets = new Set();
   
