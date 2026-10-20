@@ -6,9 +6,18 @@
 <title>睁开双眼是天空</title>
 
 <style>
+@font-face{
+  font-family:"Smiley Sans";
+  src: url("SmileySans-Oblique-2.ttf") format("truetype"),
+       url("SmileySans-Oblique-3.otf") format("opentype");
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+}
+
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;
-  font-family:"Smiley Sans","得意黑","Noto Serif SC","Source Han Serif SC","Songti SC",sans-serif;}
+  font-family:"Smiley Sans","得意黑","PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC",sans-serif;}
 #viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;}
 #stage{position:relative;width:2560px;height:1440px;flex:none;transform-origin:center center;background:#000;overflow:hidden;}
 #scenes{position:absolute;inset:0;}
@@ -978,6 +987,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;
   background: #ffb86c;
   animation: floatCharAnim 0.8s cubic-bezier(.34,1.56,.64,1);
 }
+/* 手机横屏提示遮罩层 */
+#rotate-hint {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999999;
+  background: #04060d; color: rgba(200,220,255,.85);
+  flex-direction: column; align-items: center; justify-content: center;
+  font-family: "Yozai", sans-serif; font-size: 28px; letter-spacing: 0.1em;
+  text-align: center;
+}
+/* 当处于竖屏且屏幕较小时显示 */
+@media (orientation: portrait) and (max-width: 1024px) {
+  #rotate-hint { display: flex; }
+}
 
 </style>
 </head>
@@ -987,6 +1009,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;
   <div class="loader-bar"><div class="loader-fill" id="loader-fill"></div></div>
   <div class="loader-text" id="loader-text">0%</div>
 </div>
+<!-- 手机横屏提示 -->
+<div id="rotate-hint">
+  <div style="font-size: 50px; margin-bottom: 20px;">📱</div>
+  <div>请将手机横屏以获得最佳体验</div>
+</div>
+
 <div id="viewport">
   <div id="stage">
     <div id="scenes"></div>
@@ -1726,7 +1754,7 @@ function bindMouseTrail(ctx, ch, opt){
     setTimeout(function(){ if (el.parentNode) el.remove(); }, life + 200);
   }
 
-  document.addEventListener('mousemove', handler);
+  document.addEventListener('pointermove', handler, {passive:true});
   /* ★ 链式清理：不覆盖已有的 _cleanup */
   const prevCleanup = ctx.root._cleanup;
   ctx.root._cleanup = function(){
@@ -4010,7 +4038,7 @@ SCREENS.push({ id:'s6', pages:[
       const maxY = 0;
       function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
-      win.addEventListener('mousedown', function(e){
+      win.addEventListener('pointerdown', function(e){
         markFound('s6-map');
         const s = getStageScale();
         dragging = true;
@@ -4033,11 +4061,13 @@ SCREENS.push({ id:'s6', pages:[
         dragging = false;
         win.classList.remove('grabbing');
       };
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+      document.addEventListener('pointercancel', onUp);
       ctx.root._cleanup = function(){
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointercancel', onUp);
       };
     });
   }},
@@ -7016,6 +7046,22 @@ document.addEventListener('mousemove', function(e){
   const threshold = window.innerHeight - 90;
   setProgressVisible(e.clientY > threshold);
 });
+/* 移动端：底部 120px 内出现触摸就显示进度条，3 秒后自动隐藏 */
+let _progressHideTimer = null;
+function pokeProgress(){
+  setProgressVisible(true);
+  clearTimeout(_progressHideTimer);
+  _progressHideTimer = setTimeout(function(){
+    if (!progressDraggingNow) setProgressVisible(false);
+  }, 3000);
+}
+document.addEventListener('touchstart', function(e){
+  const t = e.touches[0];
+  if (!t) return;
+  if (t.clientY > window.innerHeight - 120) pokeProgress();
+}, {passive:true});
+progressRange.addEventListener('pointerdown', pokeProgress);
+
 document.addEventListener('mouseleave', function(){
   if (!progressDraggingNow) setProgressVisible(false);
 });
@@ -7101,24 +7147,21 @@ function scanFloat(){
   _scanning = false;
 }
 
-document.addEventListener('mousemove', function(e){
-  /* 鼠标没动就不扫（避免重复触发） */
+document.addEventListener('pointermove', function(e){
   const dx = Math.abs(e.clientX - _mouseX);
   const dy = Math.abs(e.clientY - _mouseY);
   if (dx < 3 && dy < 3) return;
   _mouseX = e.clientX;
   _mouseY = e.clientY;
-  /* 每 60ms 扫一次，节流 */
   const now = performance.now();
   if (now - _lastRefresh < 60) return;
   _lastRefresh = now;
-  /* 惰性刷新缓存（每 500ms 检查一次页面是否变了） */
   if (!_floatChars.length || (now - refreshFloatChars._t || 0) > 500){
     refreshFloatChars();
     refreshFloatChars._t = now;
   }
   scanFloat();
-});
+}, {passive:true});
 
 /* ================================================================
    启动
@@ -7184,7 +7227,9 @@ function preloadAllAssets() {
     return;
   }
 
+  let isForceEntered = false;
   function oneLoaded() {
+    if (isForceEntered) return;
     loadedCount++;
     const pct = Math.round((loadedCount / totalCount) * 100);
     if (fillEl) fillEl.style.width = pct + '%';
@@ -7210,14 +7255,19 @@ function preloadAllAssets() {
       const v = document.createElement('video');
       v.src = src;
       v.onloadeddata = oneLoaded;
+      v.onloadedmetadata = oneLoaded; // 移动端兜底
       v.onerror = oneLoaded;
       v.load();
     } else if (src.endsWith('.mp3')) {
       const a = new Audio();
       a.src = src;
       a.oncanplaythrough = oneLoaded;
+      a.onloadedmetadata = oneLoaded; // 移动端兜底
       a.onerror = oneLoaded;
       a.load();
+    } else if (src.endsWith('.ttf') || src.endsWith('.otf') || src.endsWith('.woff2')) {
+      /* ★ 修复：字体文件直接跳过预加载计数，交给 CSS 自动处理 */
+      oneLoaded(); 
     } else {
       const img = new Image();
       img.src = src;
@@ -7225,20 +7275,30 @@ function preloadAllAssets() {
       img.onerror = oneLoaded;
     }
   });
-}
 
-preloadAllAssets();
-} catch(err){
-  console.error('[init 失败]', err);
-  var fb = document.createElement('div');
-  fb.style.cssText =
-    'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;' +
-    'background:#04060d;color:#c8d8ff;font-family:sans-serif;font-size:24px;' +
-    'text-align:center;line-height:1.8;padding:40px;z-index:99999;';
-  fb.innerHTML = '页面加载遇到问题，请刷新重试。<br>如果反复失败，请按 F12 查看控制台错误信息。';
-  document.body.appendChild(fb);
-}
+  /* ★ 移动端兼容：8秒兜底，改为“点击进入”解锁音频 */
+  setTimeout(function() {
+    if (loadedCount < totalCount && !isForceEntered) {
+      if (loaderEl && textEl) {
+        textEl.innerHTML = '<span style="color:#ffd880; font-size:20px; letter-spacing:2px;">点击屏幕进入 (部分音频需点击解锁)</span>';
+        loaderEl.style.cursor = 'pointer';
 
+        const enterGame = function() {
+          if (isForceEntered) return;
+          isForceEntered = true;
+          loaderEl.removeEventListener('pointerdown', enterGame);
+          loaderEl.style.opacity = '0';
+          setTimeout(() => {
+            loaderEl.style.display = 'none';
+            init(); 
+            playBgm('简单.mp3', 0, 0); 
+          }, 1000);
+        };
+        loaderEl.addEventListener('pointerdown', enterGame);
+      }
+    }
+  }, 5000); 
+}
 })();
 </script>
 </body>
