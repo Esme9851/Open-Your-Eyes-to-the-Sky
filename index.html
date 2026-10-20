@@ -7222,104 +7222,133 @@ window.addEventListener('error', function(e){
 
 /* ★ 启动：如果 init 抛错，不要黑屏，显示兜底提示 */
 try {
-/* ================================================================
-   ★ 全局预加载机制：先把所有图片/视频下载完，再放用户进来
-   ================================================================ */
-function preloadAllAssets() {
-  const scriptContent = document.documentElement.innerHTML;
-  const regex = /['"]([^'"]+\.(png|jpg|jpeg|webp|mp4|mp3|ttf|woff2))['"]/g;
-  let match;
-  const assets = new Set();
-  
-  while ((match = regex.exec(scriptContent)) !== null) {
-    assets.add(match[1]);
-  }
-  
-  const assetList = Array.from(assets);
-  let loadedCount = 0;
-  const totalCount = assetList.length;
-  
-  const fillEl = document.getElementById('loader-fill');
-  const textEl = document.getElementById('loader-text');
-  const loaderEl = document.getElementById('global-loader');
+  function preloadAllAssets() {
+    const loaderEl = document.getElementById('global-loader');
+    const textEl = document.getElementById('loader-text');
+    const fillEl = document.getElementById('loader-fill');
+    let hasEntered = false;
+    let loadedCount = 0;
+    let totalCount = 0;
 
-  if (totalCount === 0) {
-    if (loaderEl) loaderEl.style.display = 'none';
-    init();
-    return;
-  }
+    // 允许进入游戏的函数
+    window.forceSkipLoading = function() {
+      if (hasEntered) return;
+      hasEntered = true;
+      if (loaderEl) {
+        loaderEl.style.opacity = '0';
+        setTimeout(() => {
+          loaderEl.style.display = 'none';
+          init(); 
+          if (typeof playBgm === 'function') playBgm('简单.mp3', 0, 0); 
+        }, 500);
+      }
+    };
 
-  let isForceEntered = false;
-  function oneLoaded() {
-    if (isForceEntered) return;
-    loadedCount++;
-    const pct = Math.round((loadedCount / totalCount) * 100);
-    if (fillEl) fillEl.style.width = pct + '%';
-    if (textEl) textEl.textContent = pct + '% (' + loadedCount + '/' + totalCount + ')';
+    // ★ 核心优化：无论什么情况，1.5 秒后必须允许点击进入
+    setTimeout(function() {
+      if (!hasEntered && textEl) {
+        textEl.innerHTML = '<span style="color:#ffd880; font-size:22px; letter-spacing:2px; cursor:pointer;">点击屏幕先行进入</span>';
+        if (fillEl) fillEl.style.width = '100%'; 
+      }
+    }, 1500);
 
-    if (loadedCount >= totalCount) {
-      setTimeout(function() {
-        if (loaderEl) {
-          loaderEl.style.opacity = '0';
-          setTimeout(() => {
-            loaderEl.style.display = 'none';
-            init(); 
-          }, 1000);
-        } else {
-          init();
-        }
-      }, 300);
+    // 👇 加上这一行！让点击加载页任意位置都能直接进入
+    if (loaderEl) loaderEl.addEventListener('pointerdown', function() {
+      if (!hasEntered) window.forceSkipLoading();
+    });
+
+    const scriptContent = document.documentElement.innerHTML;
+    const regex = /['"]([^'"]+\.(png|jpg|jpeg|webp|mp4|mp3|ttf|woff2))['"]/g;
+    let match;
+    const assets = new Set();
+    while ((match = regex.exec(scriptContent)) !== null) { 
+      assets.add(match[1]); 
     }
-  }
+    
+    // 👇 加上这一段，强制把背景图加入预加载列表
+    const BG_LIST = [
+      '深蓝色背景', '封面', '紫色背景', '天蓝色背景', '天台', '蚊香', '表盘1', '表盘2', '表盘3',
+      '红绿灯', '楼道1', '楼道2', '楼道3', '饮料瓶', '超市', '自动门', '公园', '单杠', '石凳',
+      '旧款饮料瓶', '垃圾桶', '三个手机', '四只手', '扔垃圾', '小路', '榕树', '树藤秋千',
+      '狂笑三人', '枝桠'
+    ];
+    BG_LIST.forEach(function(name) { assets.add(name + '.jpg'); });
 
-  assetList.forEach(function(src) {
-    if (src.endsWith('.mp4')) {
-      const v = document.createElement('video');
-      v.src = src;
-      v.onloadeddata = oneLoaded;
-      v.onloadedmetadata = oneLoaded; // 移动端兜底
-      v.onerror = oneLoaded;
-      v.load();
-    } else if (src.endsWith('.mp3')) {
-      const a = new Audio();
-      a.src = src;
-      a.oncanplaythrough = oneLoaded;
-      a.onloadedmetadata = oneLoaded; // 移动端兜底
-      a.onerror = oneLoaded;
-      a.load();
-    } else if (src.endsWith('.ttf') || src.endsWith('.otf') || src.endsWith('.woff2')) {
-      /* ★ 修复：字体文件直接跳过预加载计数，交给 CSS 自动处理 */
-      oneLoaded(); 
-    } else {
-      const img = new Image();
-      img.src = src;
-      img.onload = oneLoaded;
-      img.onerror = oneLoaded;
-    }
-  });
+    const assetList = Array.from(assets);
+    totalCount = assetList.length;
+    if (totalCount === 0) { window.forceSkipLoading(); return; }
 
-  /* ★ 移动端兼容：8秒兜底，改为“点击进入”解锁音频 */
-  setTimeout(function() {
-    if (loadedCount < totalCount && !isForceEntered) {
-      if (loaderEl && textEl) {
-        textEl.innerHTML = '<span style="color:#ffd880; font-size:20px; letter-spacing:2px;">点击屏幕进入 (部分音频需点击解锁)</span>';
-        loaderEl.style.cursor = 'pointer';
+    // 区分首屏关键资源（图、字、背景）
+    const criticalKeywords = ['深蓝色背景', '封面', '睁', '开', '双', '眼', '是', '天空', '简单.mp3', 'SmileySans'];
+    const criticalAssets = assetList.filter(src => criticalKeywords.some(k => src.includes(k)));
+    const otherAssets = assetList.filter(src => !criticalAssets.includes(src));
 
-        const enterGame = function() {
-          if (isForceEntered) return;
-          isForceEntered = true;
-          loaderEl.removeEventListener('pointerdown', enterGame);
-          loaderEl.style.opacity = '0';
-          setTimeout(() => {
-            loaderEl.style.display = 'none';
-            init(); 
-            playBgm('简单.mp3', 0, 0); 
-          }, 1000);
-        };
-        loaderEl.addEventListener('pointerdown', enterGame);
+    let criticalLoaded = 0;
+    let totalCritical = criticalAssets.length;
+
+    function updateProgress() {
+      if (hasEntered) return;
+      const pct = Math.min(100, Math.round(((criticalLoaded + (loadedCount - criticalLoaded) * 0.5) / totalCount) * 100));
+      if (fillEl) fillEl.style.width = pct + '%';
+      if (textEl) textEl.textContent = pct + '% (' + loadedCount + '/' + totalCount + ')';
+      
+      // 关键资源加载完，立刻放行！
+      if (criticalLoaded >= totalCritical || loadedCount >= totalCount) {
+        window.forceSkipLoading();
       }
     }
-  }, 5000); 
+
+    function loadAsset(src, isCritical) {
+      const done = () => {
+        if (!hasEntered) {
+          loadedCount++;
+          if (isCritical) criticalLoaded++;
+          updateProgress();
+        }
+      };
+
+      if (src.endsWith('.mp4')) {
+        const v = document.createElement('video');
+        v.src = src;
+        v.preload = 'metadata'; // ★ 视频只下头部，不卡网速
+        v.onloadedmetadata = done;
+        v.onerror = done;
+        v.load();
+      } else if (src.endsWith('.mp3')) {
+        const a = new Audio();
+        a.src = src;
+        a.oncanplaythrough = done;
+        a.onerror = done;
+        a.load();
+      } else {
+        const img = new Image();
+        img.src = src;
+        img.onload = done;
+        img.onerror = done;
+      }
+    }
+
+    // 先加载关键资源（封面能瞬间出来）
+    criticalAssets.forEach(src => loadAsset(src, true));
+    
+    // 延迟 1.5 秒再加载非关键资源（留给后台慢慢下）
+    setTimeout(() => {
+      otherAssets.forEach(src => loadAsset(src, false));
+    }, 1500);
+  }
+
+  // ★ 别漏了调用这个函数！
+  preloadAllAssets();
+
+} catch(err) {
+  console.error('[init 失败]', err);
+  var fb = document.createElement('div');
+  fb.style.cssText =
+    'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;' +
+    'background:#04060d;color:#c8d8ff;font-family:sans-serif;font-size:24px;' +
+    'text-align:center;line-height:1.8;padding:40px;z-index:99999;';
+  fb.innerHTML = '页面加载遇到问题，请刷新重试。<br>如果反复失败，请按 F12 查看控制台错误信息。';
+  document.body.appendChild(fb);
 }
 })();
 </script>
