@@ -1250,8 +1250,18 @@ function stopAllTransient(){
   transientAudios.forEach(function(a){ try{ a.pause(); }catch(e){} });
   transientAudios = [];
 }
+let globalClickAudio = null;
 function playClick(){
-  playSfx('点击音效.mp3', {volume:0.6});
+  if (musicUserMuted) return;
+  try {
+    if (!globalClickAudio) {
+      globalClickAudio = new Audio('点击音效.mp3');
+    }
+    // 每次点击时，把进度归零并播放（复用同一个实例，不会打断背景音）
+    globalClickAudio.currentTime = 0;
+    globalClickAudio.volume = 0.6;
+    globalClickAudio.play().catch(function(){});
+  } catch(e){}
 }
 function startCicadaFadeIn(dur){
   if (musicUserMuted) return;   /* ★ 用户已静音 */
@@ -1431,7 +1441,13 @@ function playBgm(file, targetVol, fadeMs){
   if (!file) return;
   if (musicUserMuted) return;   /* ★ 用户静音后不再启动 */
   if (currentBgmFile === file){
-    if (bgmAudio) fadeTo(bgmAudio, targetVol, fadeMs);
+    if (bgmAudio) {
+      fadeTo(bgmAudio, targetVol, fadeMs);
+      // 👇 新增：如果发现被浏览器暂停了，强行唤醒它
+      if (bgmAudio.paused) {
+        bgmAudio.play().catch(function(){});
+      }
+    }
     if (targetVol > 0.05) showGuitarBtn();
     return;
   }
@@ -6861,7 +6877,11 @@ function doNavigate(idx, type){
       if (!newDef.keepPrev && old && old.parentNode) old.remove();
       oldTransient.forEach(function(a){ try{ a.pause(); }catch(e){} });
       finishNav(idx);
-    }, 950);
+      // 👇 新增：检查 BGM 是否被手机系统暂停了，如果是，则唤醒它
+      if (bgmAudio && bgmAudio.paused && !musicUserMuted) {
+        bgmAudio.play().catch(function(){});
+      }
+    }, 950); // 注意如果是 fade 流程，这里可能是 850
     return;
   }
 
@@ -6928,6 +6948,11 @@ function finishNav(idx){
   refreshFloatChars();
   setProgressVisible(false);
   updateBgmForPage(idx);   /* ★ 处理 BGM 的 duck / fadeout */
+  
+  // 👇 新增：每次翻页结束，无论是眨眼、淡入还是滑动，都检查一遍 BGM 是否被手机系统暂停了
+  if (bgmAudio && bgmAudio.paused && !musicUserMuted) {
+    bgmAudio.play().catch(function(){});
+  }
   const def = FLAT[idx].def;
   showCenter(!!def.showCenter);
   if (def.showCenter){ showLR(false, false); }
@@ -7009,6 +7034,12 @@ document.addEventListener('click', function(e){
   if (!t || !t.closest) return;
   if (t.closest('.navbtn') || t.closest('.clickable') || t.closest('.egg-hotspot')){
     playClick();
+    // 👇 点击后稍微等一下，如果发现背景音乐被系统憋停了，就重新拉起来
+    setTimeout(function(){
+      if (bgmAudio && bgmAudio.paused && !musicUserMuted) {
+        bgmAudio.play().catch(function(){});
+      }
+    }, 100);
   }
 }, true);
 
@@ -7258,7 +7289,7 @@ try {
     });
 
     const scriptContent = document.documentElement.innerHTML;
-    const regex = /['"]([^'"]+\.(png|jpg|jpeg|webp|mp4|mp3|ttf|woff2))['"]/g;
+    const regex = /['"]([^'"]+\.(png|jpg|jpeg|webp|mp4|ttf|woff2))['"]/g;
     let match;
     const assets = new Set();
     while ((match = regex.exec(scriptContent)) !== null) { 
@@ -7314,12 +7345,6 @@ try {
         v.onloadedmetadata = done;
         v.onerror = done;
         v.load();
-      } else if (src.endsWith('.mp3')) {
-        const a = new Audio();
-        a.src = src;
-        a.oncanplaythrough = done;
-        a.onerror = done;
-        a.load();
       } else {
         const img = new Image();
         img.src = src;
